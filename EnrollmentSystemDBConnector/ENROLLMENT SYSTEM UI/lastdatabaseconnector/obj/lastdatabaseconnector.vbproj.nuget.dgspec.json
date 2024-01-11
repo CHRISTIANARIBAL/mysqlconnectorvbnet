@@ -1,0 +1,79 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\lastdatabaseconnector\\lastdatabaseconnector\\lastdatabaseconnector.vbproj": {}
+  },
+  "projects": {
+    "D:\\lastdatabaseconnector\\lastdatabaseconnector\\lastdatabaseconnector.vbproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\lastdatabaseconnector\\lastdatabaseconnector\\lastdatabaseconnector.vbproj",
+        "projectName": "lastdatabaseconnector",
+        "projectPath": "D:\\lastdatabaseconnector\\lastdatabaseconnector\\lastdatabaseconnector.vbproj",
+        "packagesPath": "C:\\Users\\PC_1\\.nuget\\packages\\",
+        "outputPath": "D:\\lastdatabaseconnector\\lastdatabaseconnector\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\PC_1\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {},
+          "https://packagesource": {},
+          "https://packagesource1": {},
+          "https://packagesource2": {},
+          "https://packagesource3": {},
+          "https://packagesource4": {},
+          "https://packagesource5": {},
+          "https://packagesource6": {}
+        },
+        "frameworks": {
+          "net8.0-windows7.0": {
+            "targetAlias": "net8.0-windows",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0-windows7.0": {
+          "targetAlias": "net8.0-windows",
+          "dependencies": {
+            "MySql.Data": {
+              "target": "Package",
+              "version": "[8.2.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WindowsForms": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

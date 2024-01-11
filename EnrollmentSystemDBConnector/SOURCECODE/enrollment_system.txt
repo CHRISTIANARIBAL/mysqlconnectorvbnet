@@ -1,0 +1,479 @@
+create database enrollment_system;
+use enrollment_system;
+
+-- Table 1: Students
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    DateOfBirth DATE,
+    Gender ENUM('Male', 'Female', 'Other'),
+    Address VARCHAR(255)
+);
+
+DELIMITER //
+
+CREATE FUNCTION CalculateAge(dateOfBirth DATE)
+RETURNS INT
+READS SQL DATA
+BEGIN
+    DECLARE age INT;
+    SET age = YEAR(CURDATE()) - YEAR(dateOfBirth) - (DATE_FORMAT(CURDATE(), '%m%d') < DATE_FORMAT(dateOfBirth, '%m%d'));
+    RETURN age;
+END;
+
+//
+
+DELIMITER ;
+
+
+
+DELIMITER ;
+
+CREATE VIEW StudentInfo AS
+SELECT
+    StudentID,
+    CONCAT(FirstName, ' ', LastName) AS FullName,
+    DateOfBirth,
+    Gender,
+    Address
+FROM Students;
+
+
+CREATE VIEW MaleStudents AS
+SELECT * FROM Students WHERE Gender = 'Male';
+
+DELIMITER //
+
+CREATE TRIGGER before_insert_students
+BEFORE INSERT ON Students
+FOR EACH ROW
+BEGIN
+    IF NEW.DateOfBirth > CURDATE() THEN
+        SET NEW.DateOfBirth = CURDATE();
+    END IF;
+END;
+
+//
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER after_update_students
+AFTER UPDATE ON Students
+FOR EACH ROW
+BEGIN
+    -- Your logic here
+END;
+
+//
+
+DELIMITER ;
+
+
+-- Student Table Inserting Data
+INSERT INTO students VALUES(1, 'Mark Bryan', 'Magsanay', '2001-10-04', 'Male', 'Lantungan, Aurora, Zamboanga Del Sur');
+
+INSERT INTO students VALUES(2, 'Rhygie', 'Guiritan', '2002-10-23', 'Male', 'Bayabas, Aurora, Zamboanga Del Sur');
+
+INSERT INTO students VALUES(3, 'Vanessa', 'Almanoche', '2001-02-14', 'Female', 'Lintugop, Aurora, Zamboanga Del Sur');
+
+INSERT INTO students VALUES(4, 'Donald', 'Quiño', '2002-06-11', 'Male', 'Waterfall, Aurora, Zamboanga Del Sur');
+
+INSERT INTO students VALUES(5, 'Christian', 'Aribal', '2003-12-14', 'Male', 'Kahayagan West, Aurora, Zamboanga Del Sur');
+
+
+DELIMITER //
+
+CREATE PROCEDURE InsertStudent(
+    IN p_FirstName VARCHAR(50),
+    IN p_LastName VARCHAR(50),
+    IN p_DateOfBirth DATE,
+    IN p_Gender ENUM('Male', 'Female', 'Other'),
+    IN p_Address VARCHAR(255)
+)
+BEGIN
+    INSERT INTO Students (FirstName, LastName, DateOfBirth, Gender, Address)
+    VALUES (p_FirstName, p_LastName, p_DateOfBirth, p_Gender, p_Address);
+END;
+
+//
+
+DELIMITER ;
+
+CALL InsertStudent('John', 'Doe', '1990-01-15', 'Male', '123 Main St');
+
+-- display function calculate age
+SELECT CalculateAge('1990-05-15') AS Age;
+
+-- display the studentinfo view
+SELECT * FROM StudentInfo;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Table 2: Courses
+CREATE TABLE Courses (
+    CourseID INT PRIMARY KEY AUTO_INCREMENT,
+    CourseName VARCHAR(50),
+    Credits INT
+);
+
+
+DELIMITER //
+
+CREATE FUNCTION calculate_total_credits()
+RETURNS INT
+READS SQL DATA
+BEGIN
+    DECLARE total_credits INT;
+
+    -- Calculate the total credits for all courses
+    SELECT SUM(Credits) INTO total_credits
+    FROM Courses;
+
+    -- Return the result
+    RETURN total_credits;
+END;
+
+//
+
+DELIMITER ;
+
+
+CREATE VIEW CoursesView AS
+SELECT *
+FROM Courses;
+
+
+DELIMITER //
+
+CREATE TRIGGER before_insert_courses
+BEFORE INSERT ON Courses
+FOR EACH ROW
+BEGIN
+    IF NEW.Credits IS NULL THEN
+        SET NEW.Credits = 0; -- Set a default value if Credits is not provided
+    END IF;
+END;
+
+//
+
+DELIMITER ;
+
+
+-- Courses Table Inserting Data
+INSERT INTO courses VALUES(1, 'BS Information System', 23);
+
+INSERT INTO courses VALUES(2, 'BS Agriculture', 23);
+
+INSERT INTO courses VALUES(3, 'BS Biology', 23);
+
+INSERT INTO courses VALUES(4, 'Bachelor in Technical-Vocational Teacher Education', 23);
+
+INSERT INTO courses VALUES(5, 'BS Criminology', 23);
+
+
+DELIMITER //
+
+CREATE PROCEDURE get_course_info(IN course_id INT)
+BEGIN
+    SELECT *
+    FROM Courses
+    WHERE CourseID = course_id;
+END;
+
+//
+
+DELIMITER ;
+
+
+
+SELECT * FROM CoursesView;
+CALL get_course_info(1);
+
+
+
+-- Table 3: Enrollment
+CREATE TABLE Enrollment (
+    EnrollmentID INT PRIMARY KEY AUTO_INCREMENT,
+    StudentID INT,
+    CourseID INT,
+    EnrollmentDate DATE,
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
+    FOREIGN KEY (CourseID) REFERENCES Courses(CourseID)
+);
+
+
+-- Enrollment Table Inserting Data
+INSERT INTO enrollment VALUES(1, 1, 1, '2023-07-15');
+INSERT INTO enrollment VALUES(2, 2, 2, '2023-07-16');
+INSERT INTO enrollment VALUES(3, 3, 3, '2023-07-17');
+INSERT INTO enrollment VALUES(4, 4, 4, '2023-07-18');
+INSERT INTO enrollment VALUES(5, 5, 5, '2023-07-19');
+
+
+CREATE VIEW EnrollmentView AS
+SELECT *
+FROM Enrollment;
+
+SELECT * FROM EnrollmentView;
+
+
+
+
+-- Table 4: Faculty
+CREATE TABLE Faculty (
+    FacultyID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Department VARCHAR(50)
+);
+
+-- Faculty Table Inserting Data
+INSERT INTO faculty VALUES(1, 'Fedinand', 'Mayol', 'BS Information System');
+INSERT INTO faculty VALUES(2, 'Landy', 'Lumamig', 'BS Agriculture');
+INSERT INTO faculty VALUES(3, 'Carl Francis ', 'Ceniza', 'BS Biology');
+INSERT INTO faculty VALUES(4, 'Marsha', 'Labiaga', ' BTV Teacher Education');
+INSERT INTO faculty VALUES(5, 'Chona', 'Undag', 'BS Criminology');
+
+
+
+
+-- Table 5: Grades
+CREATE TABLE Grades (
+    GradeID INT PRIMARY KEY AUTO_INCREMENT,
+    EnrollmentID INT,
+    FacultyID INT,
+    Grade VARCHAR(2),
+    FOREIGN KEY (EnrollmentID) REFERENCES Enrollment(EnrollmentID),
+    FOREIGN KEY (FacultyID) REFERENCES Faculty(FacultyID)
+);
+
+-- Grades Table Inserting Data
+INSERT INTO grades VALUES(1, 1, 1, 80);
+INSERT INTO grades VALUES(2, 2, 2, 85);
+INSERT INTO grades VALUES(3, 3, 3, 89);
+INSERT INTO grades VALUES(4, 4, 4, 90);
+INSERT INTO grades VALUES(5, 5, 5, 77);
+
+
+
+-- Table 6: Departments
+CREATE TABLE Departments (
+    DepartmentID INT PRIMARY KEY AUTO_INCREMENT,
+    DepartmentName VARCHAR(50)
+);
+
+-- Departments Table Inserting Data
+INSERT INTO departments VALUES(1, 'BSIS Department');
+INSERT INTO departments VALUES(2, 'BS Agriculture Department');
+INSERT INTO departments VALUES(3, 'BS Biology Department');
+INSERT INTO departments VALUES(4, 'BTV Education Department');
+INSERT INTO departments VALUES(5, 'BS Criminology Department');
+
+
+-- Table 7: Classrooms
+CREATE TABLE Classrooms (
+    ClassroomID INT PRIMARY KEY AUTO_INCREMENT,
+    ClassroomName VARCHAR(50),
+    Capacity INT,
+    DepartmentID INT,
+    FOREIGN KEY (DepartmentID) REFERENCES Departments(DepartmentID)
+);
+-- Classrooms Table Inserting Data
+INSERT INTO classrooms VALUES(1, 'BSIS Building', 50, 1);
+INSERT INTO classrooms VALUES(2, 'Farmers Hall 2nd Floor', 50, 2);
+INSERT INTO classrooms VALUES(3, 'CHEM. LAB.', 50, 3);
+INSERT INTO classrooms VALUES(4, 'Farmers Hall 1st floor', 50, 4);
+INSERT INTO classrooms VALUES(5, 'BSCrim Building', 50, 5);
+
+
+
+-- Table 8: Schedule
+CREATE TABLE Schedule (
+    ScheduleID INT PRIMARY KEY AUTO_INCREMENT,
+    CourseID INT,
+    ClassroomID INT,
+    FacultyID INT,
+    DayOfWeek VARCHAR(10),
+    StartTime TIME,
+    EndTime TIME,
+    FOREIGN KEY (CourseID) REFERENCES Courses(CourseID),
+    FOREIGN KEY (ClassroomID) REFERENCES Classrooms(ClassroomID),
+    FOREIGN KEY (FacultyID) REFERENCES Faculty(FacultyID)
+);
+
+-- Schedule Table Inserting Data
+INSERT INTO schedule VALUE(1, 1, 1, 1, 'M-T-W-TH-f', '08:00:00', '05:00:00');
+INSERT INTO schedule VALUE(2, 2, 2, 2, 'M-T-W-TH-f', '08:00:00', '05:00:00');
+INSERT INTO schedule VALUE(3, 3, 3, 3, 'M-T-W-TH-f', '08:00:00', '05:00:00');
+INSERT INTO schedule VALUE(4, 4, 4, 4, 'M-T-W-TH-f', '08:00:00', '05:00:00');
+INSERT INTO schedule VALUE(5, 5, 5, 5, 'M-T-W-TH-f', '08:00:00', '05:00:00');
+
+
+
+-- Table 9: Exams
+CREATE TABLE Exams (
+    ExamID INT PRIMARY KEY AUTO_INCREMENT,
+    ScheduleID INT,
+    ExamDate DATE,
+    FOREIGN KEY (ScheduleID) REFERENCES Schedule(ScheduleID)
+);
+
+-- Exams Table Inserting Data
+INSERT INTO exams VALUE(1, 1, '2023-12-14');
+INSERT INTO exams VALUE(2, 2, '2023-12-15');
+INSERT INTO exams VALUE(3, 3, '2023-12-16');
+INSERT INTO exams VALUE(4, 4, '2023-12-17');
+INSERT INTO exams VALUE(5, 5, '2023-12-18');
+
+
+
+-- Table 10: ExamResults
+CREATE TABLE ExamResults (
+    ResultID INT PRIMARY KEY AUTO_INCREMENT,
+    ExamID INT,
+    EnrollmentID INT,
+    Marks INT,
+    FOREIGN KEY (ExamID) REFERENCES Exams(ExamID),
+    FOREIGN KEY (EnrollmentID) REFERENCES Enrollment(EnrollmentID)
+);
+
+
+-- ExamResults Table Inserting Data
+INSERT INTO examresults VALUES(1, 1, 1, 80);
+INSERT INTO examresults VALUES(2, 2, 2, 90);
+INSERT INTO examresults VALUES(3, 3, 3, 88);
+INSERT INTO examresults VALUES(4, 4, 4, 90);
+INSERT INTO examresults VALUES(5, 5, 5, 85);
+
+
+
+
+-- Procedures
+-- procedure to display enrolled students
+DELIMITER //
+CREATE PROCEDURE DisplayEnrolledStudents()
+BEGIN
+    SELECT Students.StudentID, Students.FirstName, Students.LastName, Students.DateOfBirth, Students.Gender, Students.Address
+    FROM Students
+    JOIN Enrollment ON Students.StudentID = Enrollment.StudentID;
+END //
+DELIMITER ;
+
+-- call the function
+CALL DisplayEnrolledStudents();
+
+
+-- Function to display department and classrooms
+DELIMITER //
+
+CREATE PROCEDURE DisplayDepartmentAndClassrooms()
+BEGIN
+    SELECT
+        d.DepartmentName,
+        c.ClassroomName,
+        c.Capacity
+    FROM
+        Departments d
+    JOIN
+        Classrooms c ON d.DepartmentID = c.DepartmentID;
+END //
+
+DELIMITER ;
+
+-- call the function
+CALL DisplayDepartmentAndClassrooms();
+
+
+-- procedure to display students enrolled in the year 2023
+DELIMITER //
+
+CREATE PROCEDURE DisplayStudentsEnrolledIn2023()
+BEGIN
+    SELECT
+        Students.StudentID,
+        Students.FirstName,
+        Students.LastName,
+        Students.DateOfBirth,
+        Students.Gender,
+        Students.Address
+    FROM
+        Students
+    JOIN
+        Enrollment ON Students.StudentID = Enrollment.StudentID
+    WHERE
+        YEAR(Enrollment.EnrollmentDate) = 2023;
+END //
+
+DELIMITER ;
+
+-- call the procedure
+CALL DisplayStudentsEnrolledIn2023();
+
+
+-- display all the courses has no enrolled students
+DELIMITER //
+
+CREATE PROCEDURE DisplayCoursesWithNoEnrollment()
+BEGIN
+    SELECT Courses.CourseID, Courses.CourseName
+    FROM Courses
+    LEFT JOIN Enrollment ON Courses.CourseID = Enrollment.CourseID
+    WHERE Enrollment.EnrollmentID IS NULL;
+END //
+
+DELIMITER ;
+
+-- call the function
+CALL DisplayCoursesWithNoEnrollment();
+
+
+-- display the failing grade students
+DELIMITER //
+
+CREATE PROCEDURE DisplayFailingStudents()
+BEGIN
+    SELECT 
+        Students.StudentID,
+        Students.FirstName,
+        Students.LastName,
+        ExamResults.Marks
+    FROM 
+        Students
+    JOIN Enrollment ON Students.StudentID = Enrollment.StudentID
+    JOIN ExamResults ON Enrollment.EnrollmentID = ExamResults.EnrollmentID
+    WHERE 
+        ExamResults.Marks < 75;
+END //
+
+DELIMITER ;
+
+-- call the function
+CALL DisplayFailingStudents();
+
+
+-- function to display exam results < 75
+DELIMITER //
+
+CREATE PROCEDURE DisplayGradesLessThan75()
+BEGIN
+    select * from examresults where marks < 75;
+
+END //
+
+DELIMITER ;
+
+call DisplayGradesLessThan75();
